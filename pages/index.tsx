@@ -100,6 +100,12 @@ interface ShowPassword {
   [key: number]: boolean;
 }
 
+interface ILogin {
+  username: string;
+  password: string;
+  url: string;
+} 
+
 export default function Dashboard({ data }: any) {
   const [passwords, setPasswords] = useState([
     {
@@ -121,6 +127,7 @@ export default function Dashboard({ data }: any) {
       password: "opensesame",
     },
   ])
+  const [newPass, setNewPass] = useState<any>({})
   const [searchTerm, setSearchTerm] = useState("")
   const [showPassword, setShowPassword] = useState<ShowPassword>({})
   const filteredPasswords = passwords.filter(
@@ -137,6 +144,18 @@ export default function Dashboard({ data }: any) {
   }
   const copyToClipboard = (text: any) => {
     navigator.clipboard.writeText(text)
+  }
+
+  const createNewLogin = async () => {
+    if (!newPass) {
+      alert("Please fill all fields")
+      return
+    }
+
+    await fetch("http://localhost:3001/api/logins/create", {
+      method: "POST",
+      body: JSON.stringify(newPass),
+    })
   }
 
   return (
@@ -269,6 +288,8 @@ export default function Dashboard({ data }: any) {
                     <Input
                       id="username"
                       className="col-span-3"
+                      required
+                      onChange={(e) => setNewPass({ ...newPass, username: e.target.value })}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -278,6 +299,8 @@ export default function Dashboard({ data }: any) {
                     <Input
                       id="password"
                       className="col-span-3"
+                      required
+                      onChange={(e) => setNewPass({ ...newPass, password: e.target.value })}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -287,12 +310,14 @@ export default function Dashboard({ data }: any) {
                     <Input
                       id="website"
                       className="col-span-3"
+                      required
+                      onChange={(e) => setNewPass({ ...newPass, url: e.target.value })}
                     />
                   </div>
                 </div>
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button type="submit" onClick={() => setPasswords([...passwords, { id: 31, password: "3164recep", username: "sassan", website: "31cek.com" }])}>Save changes</Button>
+                    <Button type="submit" onClick={async () => await createNewLogin()}>Save changes</Button>
                   </DialogClose>
                 </DialogFooter>
               </DialogContent>
