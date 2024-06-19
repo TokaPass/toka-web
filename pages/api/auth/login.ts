@@ -13,14 +13,13 @@ export default async function handler(
       res.status(400).json({ msg: [username, password] })
     }
 
-    const response = await fetch("http://localhost:3000/auth/login", {
+    await fetch("http://localhost:3000/auth/login", {
       method: "POST",
       body: req.body
     }).then((res) => res.json())
       .then((data) => {
         res.setHeader('Set-Cookie', `token=${data.data.token}; path=/; httpOnly`)
+        res.redirect("/")
       })
-
-    res.redirect("/")
   }
 }

@@ -94,12 +94,13 @@ import {
 import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { DialogClose } from "@radix-ui/react-dialog"
+import { GetServerSidePropsContext } from "next"
 
 interface ShowPassword {
   [key: number]: boolean;
 }
 
-export default function Dashboard() {
+export default function Dashboard({ data }: any) {
   const [passwords, setPasswords] = useState([
     {
       id: 1,
@@ -345,20 +346,20 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredPasswords.map((password) => (
+                  {data.thingy.logins.map((password: any) => (
                     <TableRow key={password.id}>
-                      <TableCell>{password.website}</TableCell>
+                      <TableCell>{password.url}</TableCell>
                       <TableCell>{password.username}</TableCell>
                       <TableCell>
                         {showPassword[password.id]
-                          ? password.password
+                          ? password.pass
                           : "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" onClick={() => toggleShowPassword(password.id)}>
                           <Eye className="h-5 w-5" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => copyToClipboard(password.password)}>
+                        <Button variant="ghost" size="icon" onClick={() => copyToClipboard(password.pass)}>
                           <Clipboard className="h-5 w-5" />
                         </Button>
                       </TableCell>
@@ -372,4 +373,25 @@ export default function Dashboard() {
       </div>
     </div>
   )
+}
+
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  const headers: { [token: string]: string } = {};
+
+  if (context.req.headers.cookie) {
+    headers.cookie = context.req.headers.cookie;
+  }
+  
+  const res = await fetch("http://localhost:3000/logins/all", {
+    method: 'GET',
+    headers
+  })
+
+  const data = await res.json()
+  
+  return {
+    props: {
+      data
+    }
+  }
 }
