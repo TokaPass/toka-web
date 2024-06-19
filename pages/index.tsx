@@ -21,7 +21,9 @@ import {
   Users2,
   Book,
   Cuboid,
-  Lock
+  Lock,
+  Clipboard,
+  Eye
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -53,6 +55,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -80,8 +91,53 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip"
+import { useState } from "react"
+import { Label } from "@/components/ui/label"
+import { DialogClose } from "@radix-ui/react-dialog"
+
+interface ShowPassword {
+  [key: number]: boolean;
+}
 
 export default function Dashboard() {
+  const [passwords, setPasswords] = useState([
+    {
+      id: 1,
+      website: "www.example.com",
+      username: "johndoe",
+      password: "mypassword123",
+    },
+    {
+      id: 2,
+      website: "www.acme.com",
+      username: "janedoe",
+      password: "secretpassword",
+    },
+    {
+      id: 3,
+      website: "www.github.com",
+      username: "devuser",
+      password: "opensesame",
+    },
+  ])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [showPassword, setShowPassword] = useState<ShowPassword>({})
+  const filteredPasswords = passwords.filter(
+    (password) =>
+      password.website.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      password.username.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+  const toggleShowPassword = (id: any) => {
+    setShowPassword((prevState) => ({
+      ...prevState,
+      //@ts-ignore thanks v0
+      [id]: !prevState[id],
+    }))
+  }
+  const copyToClipboard = (text: any) => {
+    navigator.clipboard.writeText(text)
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -109,34 +165,34 @@ export default function Dashboard() {
           </TooltipProvider>
 
           <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="/"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <Book className="h-5 w-5" />
-                <span className="sr-only">Passwords</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Passwords</TooltipContent>
-          </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                >
+                  <Book className="h-5 w-5" />
+                  <span className="sr-only">Passwords</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Passwords</TooltipContent>
+            </Tooltip>
           </TooltipProvider>
         </nav>
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
           <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="/"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
-          </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                >
+                  <Settings className="h-5 w-5" />
+                  <span className="sr-only">Settings</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Settings</TooltipContent>
+            </Tooltip>
           </TooltipProvider>
         </nav>
       </aside>
@@ -191,7 +247,55 @@ export default function Dashboard() {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="relative ml-auto flex-1 md:grow-0">
-  
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  Add Login
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add new Login</DialogTitle>
+                  <DialogDescription>
+                    Fill inputs and Click save when you're done.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="username" className="text-right">
+                      Username
+                    </Label>
+                    <Input
+                      id="username"
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="password" className="text-right">
+                      Password
+                    </Label>
+                    <Input
+                      id="password"
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="website" className="text-right">
+                      Website
+                    </Label>
+                    <Input
+                      id="website"
+                      className="col-span-3"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="submit" onClick={() => setPasswords([...passwords, { id: 31, password: "3164recep", username: "sassan", website: "31cek.com" }])}>Save changes</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -218,9 +322,53 @@ export default function Dashboard() {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-          <p>asdasdasd</p>
-        </main>
+        <div className="flex flex-col text-foreground overflow-y-auto">
+          <main className="flex-1 p-6">
+            <div className="relative flex-1 md:grow-0 ml-auto mb-6">
+              <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search passwords..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+              />
+            </div>
+            <div className="overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Website</TableHead>
+                    <TableHead>Username</TableHead>
+                    <TableHead>Password</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPasswords.map((password) => (
+                    <TableRow key={password.id}>
+                      <TableCell>{password.website}</TableCell>
+                      <TableCell>{password.username}</TableCell>
+                      <TableCell>
+                        {showPassword[password.id]
+                          ? password.password
+                          : "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => toggleShowPassword(password.id)}>
+                          <Eye className="h-5 w-5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => copyToClipboard(password.password)}>
+                          <Clipboard className="h-5 w-5" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   )
