@@ -1,11 +1,30 @@
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 export default function Login() {
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+
+  const sendLoginRequst = () => {
+    if (!username || !password) {
+      alert("Please fill all fields")
+      return
+    }
+
+    fetch("http://localhost:3001/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username,
+        password
+      })
+    })
+  }
+
   return (
     <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
       <div className="flex items-center justify-center py-12">
@@ -24,6 +43,7 @@ export default function Login() {
                 type="text"
                 placeholder="awesome_guy"
                 required
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
@@ -36,9 +56,9 @@ export default function Login() {
                   Forgot your password?
                 </Link>
               </div>
-              <Input id="password" type="password" required />
+              <Input onChange={(e) => setPassword(e.target.value)} id="password" type="password" required />
             </div>
-            <Button type="submit" className="w-full">
+            <Button onClick={sendLoginRequst} type="submit" className="w-full">
               Login
             </Button>
           </div>
