@@ -19,7 +19,6 @@ export default async function handler(
     }).then((res) => res.json())
       .then((data) => {
         res.setHeader('Set-Cookie', `token=${data.data.token}; path=/; httpOnly`)
-        res.redirect("/")
       })
   }
 }

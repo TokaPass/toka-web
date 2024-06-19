@@ -22,7 +22,7 @@ export default function Login() {
         username,
         password
       })
-    })
+    }).then(() => document.location.href = "/")
   }
 
   return (
