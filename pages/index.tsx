@@ -371,20 +371,20 @@ export default function Dashboard({ data }: any) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.thingy.logins.map((password: any) => (
+                  {data.data.map((password: any) => (
                     <TableRow key={password.id}>
                       <TableCell>{password.url}</TableCell>
                       <TableCell>{password.username}</TableCell>
                       <TableCell>
                         {showPassword[password.id]
-                          ? password.pass
+                          ? password.password
                           : "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" onClick={() => toggleShowPassword(password.id)}>
                           <Eye className="h-5 w-5" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => copyToClipboard(password.pass)}>
+                        <Button variant="ghost" size="icon" onClick={() => copyToClipboard(password.password)}>
                           <Clipboard className="h-5 w-5" />
                         </Button>
                       </TableCell>

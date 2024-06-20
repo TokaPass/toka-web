@@ -1,5 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
+import { resolve } from "path";
 
 export default async function handler(
   req: NextApiRequest,
@@ -19,6 +20,7 @@ export default async function handler(
     }).then((res) => res.json())
       .then((data) => {
         res.setHeader('Set-Cookie', `token=${data.data.token}; path=/; httpOnly`)
+        res.status(200).end()
       })
   }
 }
