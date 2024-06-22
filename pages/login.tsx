@@ -6,12 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+interface IUser {
+  username: string;
+  password: string;
+}
+
 export default function Login() {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+  const [login, setLogin] = useState<IUser>({ password: "", username: "" })
 
   const sendLoginRequst = () => {
-    if (!username || !password) {
+    if (!login.username || !login.password) {
       alert("Please fill all fields")
       return
     }
@@ -19,8 +23,8 @@ export default function Login() {
     fetch("http://localhost:3001/api/auth/login", {
       method: "POST",
       body: JSON.stringify({
-        username,
-        password
+        username: login.username,
+        password: login.password
       })
     }).then(() => document.location.href = "/")
   }
@@ -43,7 +47,7 @@ export default function Login() {
                 type="text"
                 placeholder="awesome_guy"
                 required
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => setLogin({ username: e.target.value, password: login.password })}
               />
             </div>
             <div className="grid gap-2">
@@ -56,7 +60,7 @@ export default function Login() {
                   Forgot your password?
                 </Link>
               </div>
-              <Input onChange={(e) => setPassword(e.target.value)} id="password" type="password" required />
+              <Input onChange={(e) => setLogin({ password: e.target.value, username: login.username })} id="password" type="password" required />
             </div>
             <Button onClick={sendLoginRequst} type="submit" className="w-full">
               Login
