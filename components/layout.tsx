@@ -45,8 +45,10 @@ import {
 import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { DialogClose } from "@radix-ui/react-dialog"
+import { usePathname } from "next/navigation"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const path = usePathname()
   const [newPass, setNewPass] = useState<any>({})
 
   const createNewLogin = async () => {
@@ -77,7 +79,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <TooltipTrigger asChild>
                   <Link
                     href="/"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${path === "/" ? "bg-accent" : ""} text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8`}
                   >
                     <Home className="h-5 w-5" />
                     <span className="sr-only">Dashboard</span>
@@ -90,9 +92,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link
+                <Link
                     href="/generator"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${path === "/generator" ? "bg-accent" : ""} text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8`}
                   >
                     <Book className="h-5 w-5" />
                     <span className="sr-only">Generator</span>
