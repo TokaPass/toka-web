@@ -23,7 +23,8 @@ import {
   Cuboid,
   Lock,
   Clipboard,
-  Eye
+  Eye,
+  CopyIcon
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -95,53 +96,61 @@ import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { DialogClose } from "@radix-ui/react-dialog"
 import { GetServerSidePropsContext } from "next"
+import { Slider } from "@/components/ui/slider"
+import { Checkbox } from "@/components/ui/checkbox"
 
-interface ShowPassword {
-  [key: number]: boolean;
+function generatePassword(
+  length: number,
+  includeUppercase: boolean = true,
+  includeLowercase: boolean = true,
+  includeNumbers: boolean = true,
+  includeSymbols: boolean = true
+): string {
+  if (length <= 0) {
+    return "Length must be greater than 0.";
+  }
+
+  const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
+  const numberChars = "0123456789";
+  const symbolChars = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+  let allChars = "";
+  if (includeUppercase) {
+    allChars += uppercaseChars;
+  }
+  if (includeLowercase) {
+    allChars += lowercaseChars;
+  }
+  if (includeNumbers) {
+    allChars += numberChars;
+  }
+  if (includeSymbols) {
+    allChars += symbolChars;
+  }
+
+  if (allChars === "") {
+    return "No character types selected. Please select at least one character type.";
+  }
+
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * allChars.length);
+    password += allChars[randomIndex];
+  }
+
+  return password;
 }
 
-interface ILogin {
-  username: string;
-  password: string;
-  url: string;
-} 
-
-export default function Dashboard({ data }: any) {
-  const [passwords, setPasswords] = useState([
-    {
-      id: 1,
-      website: "www.example.com",
-      username: "johndoe",
-      password: "mypassword123",
-    },
-    {
-      id: 2,
-      website: "www.acme.com",
-      username: "janedoe",
-      password: "secretpassword",
-    },
-    {
-      id: 3,
-      website: "www.github.com",
-      username: "devuser",
-      password: "opensesame",
-    },
-  ])
+export default function Generator() {
   const [newPass, setNewPass] = useState<any>({})
-  const [searchTerm, setSearchTerm] = useState("")
-  const [showPassword, setShowPassword] = useState<ShowPassword>({})
-  const filteredPasswords = passwords.filter(
-    (password) =>
-      password.website.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      password.username.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-  const toggleShowPassword = (id: any) => {
-    setShowPassword((prevState) => ({
-      ...prevState,
-      //@ts-ignore thanks v0
-      [id]: !prevState[id],
-    }))
-  }
+  const [length, setLenght] = useState([8])
+  const [uppercase, setUppercase] = useState<boolean | 'indeterminate'>(true);
+  const [lowercase, setLowercase] = useState<boolean | 'indeterminate'>(false)
+  const [num, setNum] = useState<boolean | 'indeterminate'>(true)
+  const [symbols, setSymbols] = useState<boolean | 'indeterminate'>(true)
+  const [generatedPass, setGeneratedPass] = useState("")
+
   const copyToClipboard = (text: any) => {
     navigator.clipboard.writeText(text)
   }
@@ -174,7 +183,7 @@ export default function Dashboard({ data }: any) {
               <TooltipTrigger asChild>
                 <Link
                   href="/"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Home className="h-5 w-5" />
                   <span className="sr-only">Dashboard</span>
@@ -188,8 +197,8 @@ export default function Dashboard({ data }: any) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/generator"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  href="/"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Book className="h-5 w-5" />
                   <span className="sr-only">Generator</span>
@@ -246,7 +255,7 @@ export default function Dashboard({ data }: any) {
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <Book className="h-5 w-5" />
-                  Passwords
+                  Generator
                 </Link>
               </nav>
             </SheetContent>
@@ -261,7 +270,7 @@ export default function Dashboard({ data }: any) {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <BreadcrumbPage>General</BreadcrumbPage>
+                  <BreadcrumbPage>Generator</BreadcrumbPage>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -350,73 +359,50 @@ export default function Dashboard({ data }: any) {
         </header>
         <div className="flex flex-col text-foreground overflow-y-auto">
           <main className="flex-1 p-6">
-            <div className="relative flex-1 md:grow-0 ml-auto mb-6">
-              <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search passwords..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-              />
-            </div>
-            <div className="overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Website</TableHead>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Password</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.data.map((password: any) => (
-                    <TableRow key={password.id}>
-                      <TableCell>{password.url}</TableCell>
-                      <TableCell>{password.username}</TableCell>
-                      <TableCell>
-                        {showPassword[password.id]
-                          ? password.password
-                          : "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => toggleShowPassword(password.id)}>
-                          <Eye className="h-5 w-5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => copyToClipboard(password.password)}>
-                          <Clipboard className="h-5 w-5" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+          <div className="grid gap-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Password Generator</h2>
+                <Button onClick={() => setGeneratedPass(generatePassword(length[0], uppercase as boolean, lowercase as boolean, num as boolean, symbols as boolean))}>Generate</Button>
+              </div>
+              <Card>
+                <CardContent className="grid gap-4">
+                  <div className="grid gap-2 mt-4">
+                    <Label htmlFor="length">Length</Label>
+                    <Slider id="length" min={8} max={32} defaultValue={[16]} step={1} onValueChange={(newVal) => setLenght(newVal)} />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className="flex items-center gap-2">
+                      <Checkbox id="include-uppercase" checked={uppercase} onCheckedChange={(newVal) => setUppercase(newVal)} />
+                      Include Uppercase
+                    </Label>
+                    <Label className="flex items-center gap-2">
+                      <Checkbox id="include-lowercase" checked={lowercase} onCheckedChange={(newVal) => setLowercase(newVal)} />
+                      Include Lowercase
+                    </Label>
+                    <Label className="flex items-center gap-2">
+                      <Checkbox id="include-numbers" checked={num} onCheckedChange={(newVal) => setNum(newVal)} />
+                      Include Numbers
+                    </Label>
+                    <Label className="flex items-center gap-2">
+                      <Checkbox id="include-symbols" checked={symbols} onCheckedChange={(newVal) => setSymbols(newVal)} />
+                      Include Symbols
+                    </Label>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">Generated Password</Label>
+                    <div className="flex items-center gap-2">
+                      <Input id="password" readOnly value={generatedPass} />
+                      <Button onClick={() => copyToClipboard(generatedPass)} variant="ghost" size="icon" className="rounded-full hover:bg-muted">
+                        <CopyIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </main>
         </div>
       </div>
     </div>
   )
-}
-
-export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-  const headers: { [token: string]: string } = {};
-
-  if (context.req.headers.cookie) {
-    headers.cookie = context.req.headers.cookie;
-  }
-  
-  const res = await fetch("http://localhost:3000/logins/all", {
-    method: 'GET',
-    headers
-  })
-
-  const data = await res.json()
-  
-  return {
-    props: {
-      data
-    }
-  }
 }
