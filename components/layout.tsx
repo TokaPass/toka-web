@@ -109,8 +109,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href="/"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                    href="/settings"
+                    className={`flex h-9 ${path === "/settings" ? "bg-accent" : ""} w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8`}
                   >
                     <Settings className="h-5 w-5" />
                     <span className="sr-only">Settings</span>

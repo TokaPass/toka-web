@@ -31,7 +31,7 @@ interface ILogin {
 }
 
 export default function Dashboard({ data }: any) {
-  const isBentoEnabled = false
+  const isBentoEnabled = JSON.parse(`${localStorage.getItem("bentoGrid")}`)
   const [searchTerm, setSearchTerm] = useState("")
   const [showPassword, setShowPassword] = useState<ShowPassword>({})
 
