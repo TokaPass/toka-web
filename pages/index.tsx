@@ -16,6 +16,9 @@ import {
 import { useState } from "react"
 import { GetServerSidePropsContext } from "next"
 import Layout from "@/components/layout"
+import { cn } from "@/lib/utils"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { cookies } from "next/headers"
 
 interface ShowPassword {
   [key: number]: boolean;
@@ -28,6 +31,7 @@ interface ILogin {
 }
 
 export default function Dashboard({ data }: any) {
+  const isBentoEnabled = false
   const [searchTerm, setSearchTerm] = useState("")
   const [showPassword, setShowPassword] = useState<ShowPassword>({})
 
@@ -61,37 +65,57 @@ export default function Dashboard({ data }: any) {
         />
       </div>
       <div className="overflow-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Website</TableHead>
-              <TableHead>Username</TableHead>
-              <TableHead>Password</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredPasswords.map((password: any) => (
-              <TableRow key={password.id}>
-                <TableCell>{password.url}</TableCell>
-                <TableCell>{password.username}</TableCell>
-                <TableCell>
-                  {showPassword[password.id]
-                    ? password.password
-                    : "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => toggleShowPassword(password.id)}>
-                    <Eye className="h-5 w-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => copyToClipboard(password.password)}>
-                    <Clipboard className="h-5 w-5" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+        {isBentoEnabled ? (
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-2">
+            {filteredPasswords.map((n: any, i: number) => (
+              <div
+                key={n}
+                className={cn(
+                  "p-1 rounded-lg h-32",
+                  i == 2 && "col-span-2",
+                  i == 3 && "col-span-2"
+                )}
+              >
+                <Card className="size-full flex items-center justify-center h-full flex-col">
+                  <p className="text-xl">{n.url}</p>
+                  <p className="text-md mt-6">{n.username}</p>
+                </Card>
+              </div>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Website</TableHead>
+                <TableHead>Username</TableHead>
+                <TableHead>Password</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPasswords.map((password: any) => (
+                <TableRow key={password.id}>
+                  <TableCell>{password.url}</TableCell>
+                  <TableCell>{password.username}</TableCell>
+                  <TableCell>
+                    {showPassword[password.id]
+                      ? password.password
+                      : "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" onClick={() => toggleShowPassword(password.id)}>
+                      <Eye className="h-5 w-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => copyToClipboard(password.password)}>
+                      <Clipboard className="h-5 w-5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
     </Layout>
   )
