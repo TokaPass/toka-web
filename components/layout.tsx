@@ -7,6 +7,7 @@ import {
   Settings,
   Book,
   Cuboid,
+  CopyIcon,
 } from "lucide-react"
 import {
   Breadcrumb,
@@ -35,7 +36,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import {
   Tooltip,
   TooltipContent,
@@ -46,16 +47,43 @@ import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { DialogClose } from "@radix-ui/react-dialog"
 import { usePathname } from "next/navigation"
+import { Separator } from "./ui/separator"
+import { generateSillyPassword } from "silly-password-generator"
+import { generatePassword } from "@/lib/password"
+import { Switch } from "./ui/switch"
+import { Checkbox } from "./ui/checkbox"
+import { Slider } from "./ui/slider"
+import { Card, CardContent } from "./ui/card"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const path = usePathname()
   const [newPass, setNewPass] = useState<any>({})
+
+  const [length, setLenght] = useState([8])
+  const [uppercase, setUppercase] = useState<boolean | 'indeterminate'>(true);
+  const [lowercase, setLowercase] = useState<boolean | 'indeterminate'>(false)
+  const [num, setNum] = useState<boolean | 'indeterminate'>(true)
+  const [symbols, setSymbols] = useState<boolean | 'indeterminate'>(true)
+  const [generatedPass, setGeneratedPass] = useState("")
+
+  const [funMode, setFunMode] = useState(false)
+  const [funCapitalize, setFunCapitalize] = useState<boolean | 'indeterminate'>(false)
+
+  const generatePasswordWithOptions = () => {
+    if (funMode) {
+      return setGeneratedPass(generateSillyPassword({ wordCount: length[0], capitalize: funCapitalize as boolean }))
+    } else {
+      setGeneratedPass(generatePassword(length[0], uppercase as boolean, lowercase as boolean, num as boolean, symbols as boolean))
+    }
+  }
 
   const createNewLogin = async () => {
     if (!newPass) {
       alert("Please fill all fields")
       return
     }
+
+    setNewPass({})
 
     await fetch("http://localhost:3001/api/logins/create", {
       method: "POST",
@@ -92,7 +120,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                <Link
+                  <Link
                     href="/generator"
                     className={`flex h-9 w-9 items-center justify-center rounded-lg ${path === "/generator" ? "bg-accent" : ""} text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8`}
                   >
@@ -206,6 +234,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         className="col-span-3"
                         required
                         onChange={(e) => setNewPass({ ...newPass, password: e.target.value })}
+                        value={newPass.password}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -219,6 +248,86 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         onChange={(e) => setNewPass({ ...newPass, url: e.target.value })}
                       />
                     </div>
+
+                    {newPass.password ? (
+                      <></>
+                    ) : (
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Sheet>
+                          <SheetTrigger className="w-full col-span-4">
+                            <Button>Password Generator</Button>
+                          </SheetTrigger>
+                          <SheetContent className="w-[800px] sm:w-[540px]">
+                            <SheetHeader>
+                              <SheetTitle>Password generator</SheetTitle>
+                              <SheetDescription>
+                                Change options to generate different passwords
+
+                                <Separator className="mt-4 mb-4" />
+
+                                <div className="grid gap-4">
+                                  <div className="flex items-center space-x-2">
+                                    <Switch id="funmode" checked={funMode} onCheckedChange={(newVal) => setFunMode(newVal)} />
+                                    <Label htmlFor="funmode">Fun mode</Label>
+                                  </div>
+                                  <Card>
+                                    <CardContent className="grid gap-4">
+                                      <div className="grid gap-2 mt-4">
+                                        <Label htmlFor="length">Length</Label>
+                                        <Slider id="length" min={8} max={32} defaultValue={[16]} step={1} onValueChange={(newVal) => setLenght(newVal)} />
+                                      </div>
+                                      <div className="grid gap-2">
+                                        {funMode ? (
+                                          <Label className="flex items-center gap-2">
+                                            <Checkbox id="include-uppercase" checked={funCapitalize} onCheckedChange={(newVal) => setFunCapitalize(newVal)} />
+                                            Capitalize
+                                          </Label>
+                                        ) : (
+                                          <div className="grid gap-2">
+                                            <Label className="flex items-center gap-2">
+                                              <Checkbox id="include-uppercase" checked={uppercase} onCheckedChange={(newVal) => setUppercase(newVal)} />
+                                              Include Uppercase
+                                            </Label>
+                                            <Label className="flex items-center gap-2">
+                                              <Checkbox id="include-lowercase" checked={lowercase} onCheckedChange={(newVal) => setLowercase(newVal)} />
+                                              Include Lowercase
+                                            </Label>
+                                            <Label className="flex items-center gap-2">
+                                              <Checkbox id="include-numbers" checked={num} onCheckedChange={(newVal) => setNum(newVal)} />
+                                              Include Numbers
+                                            </Label>
+                                            <Label className="flex items-center gap-2">
+                                              <Checkbox id="include-symbols" checked={symbols} onCheckedChange={(newVal) => setSymbols(newVal)} />
+                                              Include Symbols
+                                            </Label>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="grid gap-2">
+                                        <Label htmlFor="password">Generated Password</Label>
+                                        <div className="flex items-center gap-2">
+                                          <Input id="password" readOnly value={generatedPass} />
+                                          <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted">
+                                            <CopyIcon className="h-4 w-4" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                </div>
+
+                                <div className="mt-4">
+                                  <Button onClick={() => generatePasswordWithOptions()}>Generate</Button>
+                                  <Button onClick={() => setNewPass({ ...newPass, password: generatedPass })} variant="secondary" className="ml-4">
+                                    Use this password
+                                  </Button>
+                                </div>
+                              </SheetDescription>
+                            </SheetHeader>
+                          </SheetContent>
+                        </Sheet>
+                      </div>
+                    )}
                   </div>
                   <DialogFooter>
                     <DialogClose asChild>
