@@ -17,8 +17,7 @@ import { useState } from "react"
 import { GetServerSidePropsContext } from "next"
 import Layout from "@/components/layout"
 import { cn } from "@/lib/utils"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { cookies } from "next/headers"
+import { Card } from "@/components/ui/card"
 
 interface ShowPassword {
   [key: number]: boolean;
