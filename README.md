@@ -1,3 +1,6 @@
+# Deprecated
+Frontend code moved to [Nexus](https://github.com/TokaPass/nexus) monorepo
+
 # Toka Web
 Web interface for Toka password manager
 
